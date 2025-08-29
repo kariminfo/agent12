@@ -221,7 +221,9 @@
             "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('name', ``, 'string') }}",
             "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}",
             "telephone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('telephone', ``, 'string') }}",
-            "activite": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('activite', ``, 'string') }}"
+            "activity_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('activity_name', ``, 'string') }}",
+            "booking_date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('booking_date', ``, 'string') }}",
+            "duration": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('duration', ``, 'string') }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -256,8 +258,28 @@
               "removed": false
             },
             {
-              "id": "activite",
-              "displayName": "activite",
+              "id": "activity_name",
+              "displayName": "Activity Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "booking_date",
+              "displayName": "Booking Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "Duration",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -294,8 +316,8 @@
           "mode": "list",
           "cachedResultName": "AHLEM"
         },
-        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', `DATE DE DEBUT QUI FOURNIE PAR CLIENT`, 'string') }}",
-        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', `DATE DE FIN  QUI FOURNIE PAR CLIENT`, 'string') }}",
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('booking_date', 'The start date and time for the event, taken from the user booking.', 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('end_date', 'The end date and time for the event, calculated from the booking date and duration.', 'string') }}",
         "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
         "additionalFields": {}
       },
@@ -318,10 +340,10 @@
       "parameters": {
         "descriptionType": "manual",
         "toolDescription": "Send a message in Gmail",
-        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `TO CLIENT GMAIL QUI FOURNIE POUR RESERVATION`, 'string') }}",
-        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', 'The recipient email address, which should be the email collected from the user.', 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subject', 'The subject of the confirmation email.', 'string') }}",
         "emailType": "text",
-        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `DE CONFIRMATION `, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', 'The body of the confirmation email. It should summarize the booking details.', 'string') }}",
         "options": {
           "appendAttribution": false
         }
