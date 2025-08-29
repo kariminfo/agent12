@@ -1,0 +1,575 @@
+{
+  "name": "My workflow 6",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.messages[0].text.body }}",
+        "options": {
+          "systemMessage": "Persona ###\nYou are 'Karim', a world-class, professional, and proactive virtual travel advisor for the \"Asfar Ahlam\" agency. Your primary mission is to provide an exceptional, seamless, and personalized customer experience. Your tone must always be polite, clear, patient, and welcoming.\n\n### Your Tools ###\n1.  **knowledge_search:** This is your primary tool. Use it to search the official knowledge base to answer any questions about our travel packages, prices, policies, activities, etc.\n2.  **save_booking_request:** Use this tool ONLY after you have successfully collected ALL SIX required pieces of information for a booking. This tool saves the booking to Google Sheets.\n3.  **create_calendar_event:** Use this tool ONLY after a booking has been successfully saved to Google Sheets. This tool creates the appointment in Google Calendar.\n\n### Memory Protocol (CRITICAL) ###\nA variable named 'chat_history' is available, containing the entire conversation with the current user. Before every single response, you MUST review this history to understand the full context. This is crucial to avoid asking for information the user has already provided (like their name, phone number, etc.). Once you know the user's name, you should address them by it (e.g., \"Thank you, Mr. [Name]\").\n\n### Core Logic & Rules (Your Operating System) ###\n1.  **Language Match:** You MUST respond in the exact same language the user is writing in. If they mix languages, you adapt.\n\n2.  **Information Protocol:**\n    - Your default action for any question is to use the `knowledge_search` tool.\n    - You MUST base your answers strictly on the context you retrieve from this tool. Do not use external knowledge or invent information.\n    - If the context is empty or does not contain the answer, politely respond in the user's language: \"I have checked our information, but I couldn't find the specific detail you're asking about. Can I help with another aspect of our trips?\"\n\n3.  **BOOKING PROTOCOL (MULTI-STEP & PROGRESSIVE):**\n    - **Trigger:** Initiate this protocol ONLY when a user expresses a clear intention to book (e.g., \"I want to reserve,\" \"Let's book this trip\").\n    - **Goal:** Your objective is to progressively fill a form with SIX fields: `Full Name`, `Phone Number`, `Email`, `Activity Name`, `Booking Date`, and `Duration`.\n    - **Execution (CRITICAL):**\n        - **DO NOT** ask for all the information at once. Engage in a natural, multi-turn conversation.\n        - **Step A:** Start by asking for one or two related pieces of information. For example: \"Excellent choice! To begin the reservation process, could you please provide me with your full name and phone number?\"\n        - **Step B:** Once you receive the information, acknowledge it (e.g., \"Thank you, Mr. [Name].\"). Then, ask for the next piece of information. For example: \"Now, for which activity would you like to book, and on what date?\"\n        - **Step C:** Continue this process patiently until you have collected ALL SIX pieces of information. Do not proceed until you have everything.\n        - **Step D:** Once you have all six fields, you MUST call the `save_booking_request` tool. Do not tell the user the booking is made before this step.\n\n4.  **POST-BOOKING PROTOCOL:**\n    - After the `save_booking_request` tool is called, you MUST immediately call the `Calendar` tool with the same information.\n    - **Final Confirmation:** After both tools are used, and only then, you can confirm to the user. Respond with: \"Thank you! Your booking request for the [Activity Name] on [Booking Date] has been successfully registered. You will receive a confirmation email shortly with all the details. We look forward to welcoming you!\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -752
+      ],
+      "id": "bfe11e1e-7c96-4102-9ac1-1da7f54a2ab2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -528
+      ],
+      "id": "06bc4f9c-f637-48a6-959f-4a33907147a8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Tv2hLw52ijI9oMvk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMonth"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1Sg3TqelC34-OA7wGnt4OGrSPcDfCtn3W",
+          "mode": "list",
+          "cachedResultName": "agentah",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Sg3TqelC34-OA7wGnt4OGrSPcDfCtn3W"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -256
+      ],
+      "id": "44c89e18-b23c-4900-a14a-f3068e9dc1cd",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "0eJYcrdnXbu93kX0",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        32,
+        -208
+      ],
+      "id": "c0234c1c-95ac-4c77-a0c1-223df73000e3",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "0eJYcrdnXbu93kX0",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "karam",
+          "mode": "list"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        -272
+      ],
+      "id": "ec827bca-e7b8-46f8-b563-6f2a10b8c061",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -64
+      ],
+      "id": "b113ec49-b3bf-44e2-9adb-fdf390362441",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Tv2hLw52ijI9oMvk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        -112
+      ],
+      "id": "89b218e2-8868-43e1-95b4-9d44430094d0",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 40
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
+      "typeVersion": 1,
+      "position": [
+        560,
+        16
+      ],
+      "id": "6c8a6aa8-ec27-4944-a9db-ce4b37879ec8",
+      "name": "Token Splitter"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "when chat message received",
+        "memoryKey": {
+          "__rl": true,
+          "value": "karam",
+          "mode": "list",
+          "cachedResultName": "karam"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        -512
+      ],
+      "id": "8fef92fc-5f7d-4b5b-b314-ecdb9ad100ce",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -400
+      ],
+      "id": "5706e014-5adf-4651-b185-cb7afef026bd",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Tv2hLw52ijI9oMvk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1p5Kc7BhUmMBEBNegGRihD_t82g-KWGrihmvIa2MritE",
+          "mode": "list",
+          "cachedResultName": "AGENT1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p5Kc7BhUmMBEBNegGRihD_t82g-KWGrihmvIa2MritE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "AGENTF",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p5Kc7BhUmMBEBNegGRihD_t82g-KWGrihmvIa2MritE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('name', ``, 'string') }}",
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}",
+            "telephone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('telephone', ``, 'string') }}",
+            "activite": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('activite', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telephone",
+              "displayName": "telephone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "activite",
+              "displayName": "activite",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        -496
+      ],
+      "id": "0c28521c-ba88-40af-96c8-f7d573f0ed2d",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nnH6rmeomXZjB1Vq",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "e785b6c2b40e09fbd4e74873e99c4919d7ecb5bb58acc6040a8951211fb8b02b@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "AHLEM"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', `DATE DE DEBUT QUI FOURNIE PAR CLIENT`, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', `DATE DE FIN  QUI FOURNIE PAR CLIENT`, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        -496
+      ],
+      "id": "ca22f84a-e199-4c83-8ce9-43071358ec24",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "sxky2jicNDiwFkjb",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Send a message in Gmail",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `TO CLIENT GMAIL QUI FOURNIE POUR RESERVATION`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `DE CONFIRMATION `, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        624,
+        -480
+      ],
+      "id": "18f81df3-4aea-4a19-bdd9-44f1466b0731",
+      "name": "Send a message in Gmail",
+      "webhookId": "81d9f588-8db1-4a7a-97e0-e7b55e0341e0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I9kBIkScKU5HmDGJ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "contextWindowLength": 1000
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        -512
+      ],
+      "id": "b31e4304-8d19-4770-a1ad-e51df91992a4",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -752
+      ],
+      "id": "f2c2d4cd-6c23-4d28-9961-1983e8aa275e",
+      "name": "WhatsApp Trigger",
+      "webhookId": "55d7d411-b966-48a6-abab-897fa194c6c8",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "DFaabNrhbKhaTGad",
+          "name": "WhatsApp OAuth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "733720876499204",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -752
+      ],
+      "id": "0704f3c7-4c91-4dcf-a26f-e76a186c06bc",
+      "name": "Send message",
+      "webhookId": "95034c24-f419-4826-b909-166f86b4901b",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "aHyI8Q4IphmQk7vC",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3959d424-89ce-4bee-98b2-ce55a13794c0",
+  "meta": {
+    "instanceId": "3a5511fe490822ba0f5cedc6939f58e9252f71178ae79f1750e6c88d9dff34b4"
+  },
+  "id": "xEBBvaZpg5htOoSn",
+  "tags": []
+}
